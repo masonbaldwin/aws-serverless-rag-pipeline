@@ -206,5 +206,8 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-ingest_lambda/*
-!ingest_lambda/lambda_function.py
+ingest-lambda/*
+!ingest-lambda/handler.py
+ingest.zip
+
+
