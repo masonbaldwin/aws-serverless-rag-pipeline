@@ -24,12 +24,13 @@ def extract_text(file_bytes: bytes, filename: str) -> str:
     elif filename.endswith(".xlsx"):
         try:
             excel_io = io.BytesIO(file_bytes)
-            df = pd.read_excel(excel_io, sheet_name=None)  
+            df_dict = pd.read_excel(excel_io, sheet_name=None)
             all_text = ""
-            for sheet_name, sheet_df in df.items():
+            for sheet_name, df in df_dict.items():
                 all_text += f"\nSheet: {sheet_name}\n"
-                all_text += sheet_df.to_string(index=False)
-                all_text += "\n"
+                for row in df.to_dict(orient="records"):
+                    row_str = ", ".join([f"{k}: {v}" for k, v in row.items()])
+                    all_text += row_str + "\n"
             return all_text
         except Exception as e:
             return f"ERROR parsing Excel: {e}"
