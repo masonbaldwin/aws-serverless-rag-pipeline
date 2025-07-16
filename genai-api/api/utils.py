@@ -1,6 +1,4 @@
-# app/utils.py
-
-import fitz  # PyMuPDF
+import fitz
 import io
 from typing import List
 from opensearchpy import OpenSearch
@@ -26,7 +24,7 @@ def extract_text(file_bytes: bytes, filename: str) -> str:
     elif filename.endswith(".xlsx"):
         try:
             excel_io = io.BytesIO(file_bytes)
-            df = pd.read_excel(excel_io, sheet_name=None)  # All sheets
+            df = pd.read_excel(excel_io, sheet_name=None)  
             all_text = ""
             for sheet_name, sheet_df in df.items():
                 all_text += f"\nSheet: {sheet_name}\n"
@@ -57,14 +55,14 @@ def index_chunks(chunks, sha, filename, opensearch, index_name):
         for i, chunk in enumerate(chunks):
             print(f"DEBUG: Indexing chunk {i+1}/{len(chunks)}")
 
-            embedding = get_embedding(chunk)  # <- NEW: Embed the chunk here
+            embedding = get_embedding(chunk)  
 
             doc = {
                 "sha": sha,
                 "filename": filename,
                 "chunk": chunk,
                 "chunk_id": i,
-                "embedding": embedding  # <- NEW: Include the vector
+                "embedding": embedding  
             }
 
             response = opensearch.index(index=index_name, body=doc)
@@ -76,12 +74,10 @@ def index_chunks(chunks, sha, filename, opensearch, index_name):
 def ask_question(question: str, os_client: OpenSearch, index: str, top_k: int = 4):
     print("DEBUG: Starting ask_question")
 
-    # Step 1: Embed question
     print("DEBUG: Generating embedding for question...")
     embedding = get_embedding(question)
     print("DEBUG: Embedding generated")
 
-    # Step 2: Query OpenSearch with KNN
     print("DEBUG: Querying OpenSearch...")
     response = os_client.search(
         index=index,
@@ -99,12 +95,10 @@ def ask_question(question: str, os_client: OpenSearch, index: str, top_k: int = 
     )
     print(f"DEBUG: OpenSearch response: {response}")
 
-    # Step 3: Extract relevant chunks and sources
     hits = response["hits"]["hits"]
     context_chunks = [hit["_source"]["chunk"] for hit in hits]
     sources = [hit["_source"]["filename"] for hit in hits]
 
-    # Step 4: Build RAG prompt
     prompt = f"""You are a helpful assistant. Answer the user's question using only the context below.
 
 Context:
@@ -115,7 +109,6 @@ Question:
 
 Answer:"""
 
-    # Step 5: Get answer from OpenAI
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}],

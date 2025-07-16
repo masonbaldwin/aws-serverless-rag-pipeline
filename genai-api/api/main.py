@@ -1,5 +1,3 @@
-# app/main.py
-
 from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.responses import JSONResponse
 import boto3, hashlib, os
@@ -9,15 +7,13 @@ from pathlib import Path
 from requests_aws4auth import AWS4Auth
 from fastapi.middleware.cors import CORSMiddleware
 
-region = "us-east-1"  # your actual AWS region
+region = "us-east-1"  
 session = boto3.Session()
 credentials = session.get_credentials()
 
-# Force load .env from parent of current file's directory
 env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
-# Debug: print to verify .env loaded
 print("DEBUG: OPENAI_API_KEY =", os.getenv("OPENAI_API_KEY"))
 
 from utils import extract_text, chunk_text, index_chunks, ask_question
