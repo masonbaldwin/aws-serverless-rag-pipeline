@@ -7,7 +7,7 @@ export default function App() {
   const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const BASE_URL = "https://dducuroud0.execute-api.us-east-1.amazonaws.com/dev";
+  const BASE_URL = "http://localhost:8000";
 
   const uploadFile = async () => {
     if (!file) return;
@@ -39,7 +39,7 @@ export default function App() {
 
   return (
     <div className="max-w-xl mx-auto p-4 space-y-4">
-      <h1 className="text-xl font-bold">🧠 Gen AI RAG App</h1>
+      <h1 className="text-xl font-bold">Gen AI RAG App</h1>
 
       <div className="space-y-2">
         <input type="file" onChange={(e) => setFile(e.target.files[0])} />
