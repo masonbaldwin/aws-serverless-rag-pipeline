@@ -8,6 +8,7 @@ import openai
 from openai import OpenAI
 import os
 import requests
+import pandas as pd
 
 client = OpenAI()
 
@@ -17,10 +18,23 @@ def get_embedding(text: str) -> List[float]:
         model="text-embedding-ada-002"
     )
     return response.data[0].embedding
+
 def extract_text(file_bytes: bytes, filename: str) -> str:
     if filename.endswith(".pdf"):
         doc = fitz.open(stream=io.BytesIO(file_bytes), filetype="pdf")
         return "\n".join([page.get_text() for page in doc])
+    elif filename.endswith(".xlsx"):
+        try:
+            excel_io = io.BytesIO(file_bytes)
+            df = pd.read_excel(excel_io, sheet_name=None)  # All sheets
+            all_text = ""
+            for sheet_name, sheet_df in df.items():
+                all_text += f"\nSheet: {sheet_name}\n"
+                all_text += sheet_df.to_string(index=False)
+                all_text += "\n"
+            return all_text
+        except Exception as e:
+            return f"ERROR parsing Excel: {e}"
     else:
         return file_bytes.decode("utf-8", errors="ignore")
 

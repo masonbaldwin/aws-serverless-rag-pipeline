@@ -1,42 +1,32 @@
 from opensearchpy import OpenSearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
-import boto3
+import boto3, os
+from dotenv import load_dotenv
+from pathlib import Path
 
-region = 'us-east-1'
-service = 'es'
+env_path = Path(__file__).resolve().parent / "genai-api" / ".env"
+load_dotenv(dotenv_path=env_path)
 
+region = "us-east-1"
 credentials = boto3.Session().get_credentials()
-awsauth = AWS4Auth(
-    credentials.access_key,
-    credentials.secret_key,
-    region,
-    service,
-    session_token=credentials.token
-)
-
-host = 'search-genai-vector-db-3pccssj7pwu3trjlw6qbxq23uu.us-east-1.es.amazonaws.com'
 
 client = OpenSearch(
-    hosts=[{'host': host, 'port': 443}],
-    http_auth=awsauth,
+    hosts=[{"host": os.environ["OPENSEARCH_HOST"], "port": 443}],
+    http_auth=AWS4Auth(
+        credentials.access_key,
+        credentials.secret_key,
+        region,
+        "es",
+        session_token=credentials.token
+    ),
     use_ssl=True,
     verify_certs=True,
     connection_class=RequestsHttpConnection
 )
 
-doc_count = client.count(index="genai-index")
-print(f"Document count: {doc_count['count']}")
-
-response = client.search(
-    index="genai-index",
-    body={
-        "query": {
-            "match_all": {}
-        },
-        "size": 5  # Adjust as needed
-    }
+response = client.delete_by_query(
+    index=os.environ["OPENSEARCH_INDEX"],
+    body={"query": {"match_all": {}}}
 )
 
-print("Sample documents from genai-index:")
-for hit in response['hits']['hits']:
-    print(hit['_source'])
+print("Deleted:", response["deleted"])

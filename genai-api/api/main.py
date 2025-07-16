@@ -83,6 +83,10 @@ async def upload_file(file: UploadFile = File(...)):
     print("Chunks indexed in OpenSearch")
 
     print("Returning success response")
+
+    text = extract_text(contents, file.filename)
+    print(f"\n--- EXTRACTED TEXT ---\n{text}\n----------------------\n")
+
     return {"message": "File indexed successfully", "sha": sha, "filename": file.filename}
 
 @app.post("/ask")
